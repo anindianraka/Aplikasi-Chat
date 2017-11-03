@@ -1,0 +1,66 @@
+package com.example.raka.aplikasichat;
+
+import android.content.SharedPreferences;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
+public class tambah_chat extends AppCompatActivity {
+
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor spEditor;
+    EditText iNama, iPesan;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_tambah_chat);
+
+        getSupportActionBar().setTitle("Tambah Pesan");
+
+        iNama = (EditText) findViewById(R.id.inpUser);
+        iPesan = (EditText) findViewById(R.id.inpPesan);
+        sharedPreferences = getSharedPreferences(MainActivity.preff,0);
+        spEditor = sharedPreferences.edit();
+    }
+
+    public void kirimPesan(View view) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("NamaPengirim",iNama.getText().toString());
+            jsonObject.put("KontenPesan",iPesan.getText().toString());
+            jsonObject.put("Tanggalan",new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime()));
+            jsonObject.put("GambarPengirim",R.drawable.naruto);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        if(sharedPreferences.contains("message")) {
+            String dataMessage = sharedPreferences.getString("message","");
+
+            try {
+                JSONArray jsonArray = new JSONArray(dataMessage);
+                jsonArray.put(jsonObject);
+                spEditor.putString("message", jsonArray.toString());
+                spEditor.apply();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else {
+            JSONArray jsonArray = new JSONArray();
+            jsonArray.put(jsonObject);
+            spEditor.putString("message", jsonArray.toString());
+            spEditor.apply();
+        }
+
+        finish();
+    }
+}
